@@ -1,0 +1,76 @@
+-- 5. Missing-index suggestions (advisory only; do not create automatically)
+SELECT TOP (30)
+    DB_NAME(mid.database_id) AS database_name,
+    OBJECT_SCHEMA_NAME(mid.object_id, mid.database_id) AS schema_name,
+    OBJECT_NAME(mid.object_id, mid.database_id) AS table_name,
+    migs.user_seeks,
+    migs.user_scans,
+    migs.avg_total_user_cost,
+    migs.avg_user_impact,
+    (migs.user_seeks + migs.user_scans) * migs.avg_total_user_cost
+        * (migs.avg_user_impact / 100.0) AS estimated_benefit,
+    mid.equality_columns,
+    mid.inequality_columns,
+    mid.included_columns
+FROM sys.dm_db_missing_index_group_stats AS migs
+JOIN sys.dm_db_missing_index_groups AS mig
+  ON migs.group_handle = mig.index_group_handle
+JOIN sys.dm_db_missing_index_details AS mid
+  ON mig.index_handle = mid.index_handle
+ORDER BY estimated_benefit DESC;
+
+-- Next step: Get the existing index definitions
+Run this query against the database containing the table. Replace the schema and table name.
+
+SELECT
+    i.name AS index_name,
+    i.type_desc,
+    i.is_unique,
+    i.is_primary_key,
+    i.is_disabled,
+    STRING_AGG(
+        CASE
+            WHEN ic.is_included_column = 0
+            THEN QUOTENAME(c.name)
+        END, ', '
+    ) WITHIN GROUP (ORDER BY ic.key_ordinal) AS key_columns,
+    STRING_AGG(
+        CASE
+            WHEN ic.is_included_column = 1
+            THEN QUOTENAME(c.name)
+        END, ', '
+    ) AS included_columns
+FROM sys.indexes i
+INNER JOIN sys.index_columns ic
+    ON i.object_id = ic.object_id
+    AND i.index_id = ic.index_id
+INNER JOIN sys.columns c
+    ON ic.object_id = c.object_id
+    AND ic.column_id = c.column_id
+WHERE i.object_id = OBJECT_ID(N'dbo.YourTableName')
+  AND i.index_id > 0
+GROUP BY
+    i.name,
+    i.type_desc,
+    i.is_unique,
+    i.is_primary_key,
+    i.is_disabled
+ORDER BY i.index_id;
+
+-- Also get index usage statistics
+
+SELECT
+    i.name AS index_name,
+    i.type_desc,
+    ISNULL(s.user_seeks, 0) AS user_seeks,
+    ISNULL(s.user_scans, 0) AS user_scans,
+    ISNULL(s.user_lookups, 0) AS user_lookups,
+    ISNULL(s.user_updates, 0) AS user_updates
+FROM sys.indexes i
+LEFT JOIN sys.dm_db_index_usage_stats s
+    ON i.object_id = s.object_id
+    AND i.index_id = s.index_id
+    AND s.database_id = DB_ID()
+WHERE i.object_id = OBJECT_ID(N'dbo.YourTableName')
+  AND i.index_id > 0
+ORDER BY i.index_id;
