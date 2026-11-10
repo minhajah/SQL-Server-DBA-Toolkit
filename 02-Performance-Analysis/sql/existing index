@@ -23,6 +23,7 @@ ORDER BY estimated_benefit DESC;
 Run this query against the database containing the table. Replace the schema and table name.
 
 SELECT
+    i.index_id,
     i.name AS index_name,
     i.type_desc,
     i.is_unique,
@@ -50,6 +51,7 @@ INNER JOIN sys.columns c
 WHERE i.object_id = OBJECT_ID(N'dbo.YourTableName')
   AND i.index_id > 0
 GROUP BY
+    i.index_id,
     i.name,
     i.type_desc,
     i.is_unique,
