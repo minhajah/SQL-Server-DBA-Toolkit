@@ -1,0 +1,3 @@
+SET NOCOUNT ON;
+SELECT DB_NAME(v.database_id) AS database_name,mf.name AS logical_file_name,mf.type_desc,mf.physical_name,v.num_of_reads,v.num_of_bytes_read/1048576.0 AS mb_read,CASE WHEN v.num_of_reads=0 THEN 0 ELSE v.io_stall_read_ms*1.0/v.num_of_reads END AS avg_read_stall_ms,v.num_of_writes,v.num_of_bytes_written/1048576.0 AS mb_written,CASE WHEN v.num_of_writes=0 THEN 0 ELSE v.io_stall_write_ms*1.0/v.num_of_writes END AS avg_write_stall_ms
+FROM sys.dm_io_virtual_file_stats(NULL,NULL) v JOIN sys.master_files mf ON mf.database_id=v.database_id AND mf.file_id=v.file_id ORDER BY avg_read_stall_ms DESC;
