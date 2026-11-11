@@ -1,0 +1,3 @@
+SET NOCOUNT ON;
+SELECT TOP (100) DB_NAME(d.database_id) AS database_name, OBJECT_SCHEMA_NAME(d.object_id,d.database_id) AS schema_name, OBJECT_NAME(d.object_id,d.database_id) AS table_name, g.user_seeks,g.user_scans,g.avg_total_user_cost,g.avg_user_impact,CAST(g.avg_total_user_cost*(g.avg_user_impact/100.0)*(g.user_seeks+g.user_scans) AS decimal(28,2)) AS estimated_benefit_score,d.equality_columns,d.inequality_columns,d.included_columns
+FROM sys.dm_db_missing_index_group_stats g JOIN sys.dm_db_missing_index_groups ig ON ig.index_group_handle=g.group_handle JOIN sys.dm_db_missing_index_details d ON d.index_handle=ig.index_handle WHERE d.database_id=DB_ID() ORDER BY estimated_benefit_score DESC;
