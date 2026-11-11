@@ -1,0 +1,3 @@
+# 12 – Maintenance Analysis
+
+Scripts inventory maintenance-related SQL Agent jobs, statistics metadata, larger-index physical stats, and database maintenance indicators. Run job inventory from `msdb`; run database scripts in each database or `master` as indicated in script headers. Job-name matching is heuristic and may miss custom/external maintenance. Statistics modification counts and fragmentation are evidence for review, not universal thresholds. This module does not run UPDATE STATISTICS, ALTER INDEX, DBCC CHECKDB, or backups. Confirm ownership with Commvault/PPDM or other enterprise tools to avoid duplicate operations.
