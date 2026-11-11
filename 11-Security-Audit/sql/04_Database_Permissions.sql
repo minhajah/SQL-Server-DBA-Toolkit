@@ -1,0 +1,2 @@
+SET NOCOUNT ON;
+SELECT DB_NAME() AS database_name,g.name AS grantee_name,g.type_desc,p.state_desc,p.permission_name,p.class_desc,CASE WHEN p.class_desc='OBJECT_OR_COLUMN' THEN QUOTENAME(OBJECT_SCHEMA_NAME(p.major_id))+'.'+QUOTENAME(OBJECT_NAME(p.major_id)) WHEN p.class_desc='SCHEMA' THEN SCHEMA_NAME(p.major_id) END AS securable_name FROM sys.database_permissions p JOIN sys.database_principals g ON g.principal_id=p.grantee_principal_id ORDER BY g.name,p.permission_name;

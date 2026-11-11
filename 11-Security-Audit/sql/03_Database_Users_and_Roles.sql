@@ -1,0 +1,2 @@
+SET NOCOUNT ON;
+SELECT DB_NAME() AS database_name,p.name AS user_name,p.type_desc,p.authentication_type_desc,p.default_schema_name,r.name AS database_role FROM sys.database_principals p LEFT JOIN sys.database_role_members m ON m.member_principal_id=p.principal_id LEFT JOIN sys.database_principals r ON r.principal_id=m.role_principal_id WHERE p.principal_id>4 AND p.type<>'R' ORDER BY p.name,r.name;

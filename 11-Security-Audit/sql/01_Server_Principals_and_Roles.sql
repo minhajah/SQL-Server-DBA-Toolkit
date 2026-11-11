@@ -1,0 +1,2 @@
+SET NOCOUNT ON;
+SELECT p.name AS principal_name,p.type_desc,p.is_disabled,p.default_database_name,p.create_date,r.name AS server_role FROM sys.server_principals p LEFT JOIN sys.server_role_members m ON m.member_principal_id=p.principal_id LEFT JOIN sys.server_principals r ON r.principal_id=m.role_principal_id WHERE p.type IN ('S','U','G','E','X') AND p.name NOT LIKE '##%##' ORDER BY p.name,r.name;
