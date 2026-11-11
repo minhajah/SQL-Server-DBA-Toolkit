@@ -1,0 +1,2 @@
+SET NOCOUNT ON;
+SELECT name,state_desc,user_access_desc,recovery_model_desc,compatibility_level,page_verify_option_desc,is_auto_close_on,is_auto_shrink_on,log_reuse_wait_desc,is_read_only,is_auto_create_stats_on,is_auto_update_stats_on,is_auto_update_stats_async_on FROM sys.databases WHERE database_id>4 ORDER BY name;

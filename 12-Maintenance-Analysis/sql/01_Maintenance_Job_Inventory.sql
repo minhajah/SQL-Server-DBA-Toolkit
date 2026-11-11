@@ -1,0 +1,3 @@
+SET NOCOUNT ON;
+;WITH LastRun AS (SELECT job_id,run_date,run_time,run_duration,run_status,ROW_NUMBER() OVER(PARTITION BY job_id ORDER BY instance_id DESC) AS rn FROM msdb.dbo.sysjobhistory WHERE step_id=0)
+SELECT j.name,j.enabled,SUSER_SNAME(j.owner_sid) AS job_owner,lr.run_date,lr.run_time,lr.run_duration,CASE lr.run_status WHEN 0 THEN 'Failed' WHEN 1 THEN 'Succeeded' WHEN 2 THEN 'Retry' WHEN 3 THEN 'Canceled' WHEN 4 THEN 'In Progress' ELSE 'No history' END AS last_run_status FROM msdb.dbo.sysjobs j LEFT JOIN LastRun lr ON lr.job_id=j.job_id AND lr.rn=1 WHERE j.name LIKE '%maint%' OR j.name LIKE '%index%' OR j.name LIKE '%stat%' OR j.name LIKE '%checkdb%' OR j.name LIKE '%integrity%' ORDER BY j.name;

@@ -1,0 +1,2 @@
+SET NOCOUNT ON;
+SELECT DB_NAME() AS database_name,OBJECT_SCHEMA_NAME(s.object_id) AS schema_name,OBJECT_NAME(s.object_id) AS table_name,s.name AS statistics_name,s.auto_created,s.user_created,s.no_recompute,p.last_updated,p.rows,p.rows_sampled,p.modification_counter,CAST(100.0*p.modification_counter/NULLIF(p.rows,0) AS decimal(10,2)) AS modified_percent_of_rows FROM sys.stats s CROSS APPLY sys.dm_db_stats_properties(s.object_id,s.stats_id) p WHERE OBJECTPROPERTY(s.object_id,'IsUserTable')=1 ORDER BY p.modification_counter DESC,p.rows DESC;
