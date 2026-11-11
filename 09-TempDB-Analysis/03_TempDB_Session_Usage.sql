@@ -1,0 +1,3 @@
+SET NOCOUNT ON;
+SELECT TOP (100) s.session_id,s.login_name,s.host_name,s.program_name,s.status,s.open_transaction_count,(u.user_objects_alloc_page_count-u.user_objects_dealloc_page_count)*8.0/1024 AS user_objects_net_mb,(u.internal_objects_alloc_page_count-u.internal_objects_dealloc_page_count)*8.0/1024 AS internal_objects_net_mb,r.status AS request_status,r.command,r.wait_type,r.blocking_session_id
+FROM sys.dm_db_session_space_usage u JOIN sys.dm_exec_sessions s ON s.session_id=u.session_id LEFT JOIN sys.dm_exec_requests r ON r.session_id=s.session_id WHERE s.is_user_process=1 ORDER BY user_objects_net_mb+internal_objects_net_mb DESC;
